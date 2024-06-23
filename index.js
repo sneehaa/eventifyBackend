@@ -3,9 +3,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./database/db');
 const cors = require('cors');
-const cloudinary = require('cloudinary');
+const cloudinary = require('cloudinary').v2;
 const acceptMultimedia = require('connect-multiparty');
-const { authGuard } = require('./middleware/authGuard');
 
 // Making express app
 const app = express();
@@ -41,7 +40,11 @@ app.use(express.json());
 // creating test route
 app.get("/test", (req,res) => {
     res.status(200).send("Hello");
+
 })
+
+//creating user routes
+app.use('/api/user', require('./routes/userRoutes'))
 
 
 // defining port
@@ -49,7 +52,6 @@ const PORT = process.env.PORT;
 // run the server
 app.listen(PORT, ()=>{
     console.log(`Server is running on port ${PORT}`)
-    console.log("Connected to Database")
 })
 
 // exporting app
