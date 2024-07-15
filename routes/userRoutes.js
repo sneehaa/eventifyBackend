@@ -20,4 +20,7 @@ router.put("/edit/:userId", authGuard, userController.editUserProfile);
 
 router.delete('/delete/:userId', authGuard, userController.deleteUserAccount);
 
+// Route to send OTP via SMS
+router.post('/sendOTP', userController.sendOTP)
+
 module.exports = router;
