@@ -1,28 +1,27 @@
 const jwt = require('jsonwebtoken');
 
 const authGuard = (req, res, next) => {
-  // check if auth header is present
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.json({
+    console.log("Authorization header missing!");
+    return res.status(401).json({
       success: false,
       message: "Authorization header missing!"
-    })
+    });
   }
 
-  // split auth header and get token
-  // Format : 'Bearer ghfdrgthyuhgvfghjkiujhghjuhjg'
   const token = authHeader.split(' ')[1];
   if (!token) {
-    return res.json({
+    console.log("Token missing!");
+    return res.status(401).json({
       success: false,
       message: "Token missing!"
-    })
+    });
   }
 
-  // verify token
   try {
     const decodedData = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded token data:", decodedData); // Log the decoded token data
     req.user = {
       id: decodedData.id,
       role: decodedData.role,
@@ -30,34 +29,33 @@ const authGuard = (req, res, next) => {
     };
     next();
   } catch (error) {
-    res.json({
+    console.error("Invalid token!", error); // Log the error for debugging
+    res.status(401).json({
       success: false,
       message: "Invalid token!"
-    })
+    });
   }
 };
 
 const authGuardAdmin = (req, res, next) => {
-  // check if auth header is present
   const authHeader = req.headers.authorization;
+
   if (!authHeader) {
-    return res.json({
+    return res.status(401).json({
       success: false,
       message: "Authorization header missing!"
-    })
+    });
   }
 
-  // split auth header and get token
-  // Format : 'Bearer ghfdrgthyuhgvfghjkiujhghjuhjg'
   const token = authHeader.split(' ')[1];
+
   if (!token) {
-    return res.json({
+    return res.status(401).json({
       success: false,
       message: "Token missing!"
-    })
+    });
   }
 
-  // verify token
   try {
     const decodedData = jwt.verify(token, process.env.JWT_SECRET);
     req.user = {
@@ -65,22 +63,25 @@ const authGuardAdmin = (req, res, next) => {
       role: decodedData.role,
       permissions: decodedData.permissions
     };
-    if (req.user.role !== 'admin' || !req.user.permissions.includes('admin')) {
-      return res.json({
+
+    if (decodedData.isAdmin !== true) {
+      return res.status(403).json({ // Changed to 403 for permission denied
         success: false,
         message: "Permission denied!"
-      })
+      });
     }
+
     next();
   } catch (error) {
-    res.json({
+    console.error("Invalid token!", error); // Log the error for debugging
+    res.status(401).json({
       success: false,
       message: "Invalid token!"
-    })
+    });
   }
 };
 
 module.exports = {
   authGuard,
-  authGuardAdmin
+  authGuardAdmin,
 };
